@@ -1,50 +1,52 @@
-import React, { useCallback, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import isHotkey from 'is-hotkey'
 import { Editable, withReact, useSlate, Slate } from 'slate-react'
 import {
   Editor,
   Transforms,
   createEditor,
-  Descendant,
   Element as SlateElement,
 } from 'slate'
 import { withHistory } from 'slate-history'
-
-import { Button, Icon, Toolbar } from './components'
+import { Button, Toolbar } from './components'
+import './App.less'
 
 const HOTKEYS = {
   'mod+b': 'bold',
   'mod+i': 'italic',
   'mod+u': 'underline',
   'mod+`': 'code',
+} as {
+  [key: string]: string
 }
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 const RichTextExample = () => {
-  const renderElement = useCallback(props => <Element {...props} />, [])
-  const renderLeaf = useCallback(props => <Leaf {...props} />, [])
+  const renderElement = useCallback((props: any) => <Element {...props} />, [])
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, [])
   const editor = useMemo(() => withHistory(withReact(createEditor())), [])
 
   return (
     <Slate editor={editor} initialValue={initialValue}>
       <Toolbar>
-        <MarkButton format="bold" icon="format_bold" />
-        <MarkButton format="italic" icon="format_italic" />
-        <MarkButton format="underline" icon="format_underlined" />
+        <MarkButton format="bold" icon="bold" />
+        <MarkButton format="italic" icon="italic" />
+        <MarkButton format="underline" icon="underline" />
         <MarkButton format="code" icon="code" />
         <BlockButton format="heading-one" icon="looks_one" />
         <BlockButton format="heading-two" icon="looks_two" />
         <BlockButton format="block-quote" icon="format_quote" />
-        <BlockButton format="numbered-list" icon="format_list_numbered" />
-        <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-        <BlockButton format="left" icon="format_align_left" />
-        <BlockButton format="center" icon="format_align_center" />
-        <BlockButton format="right" icon="format_align_right" />
-        <BlockButton format="justify" icon="format_align_justify" />
+        <BlockButton format="numbered-list" icon="numbered" />
+        <BlockButton format="bulleted-list" icon="bulleted" />
+        <BlockButton format="left" icon="align_left" />
+        <BlockButton format="center" icon="align_center" />
+        <BlockButton format="right" icon="align_right" />
+        <BlockButton format="justify" icon="align_justify" />
       </Toolbar>
       <Editable
+        className='editable-content'
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         placeholder="Enter some rich text…"
@@ -52,7 +54,7 @@ const RichTextExample = () => {
         autoFocus
         onKeyDown={event => {
           for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, event as any)) {
+            if (isHotkey(hotkey, event)) {
               event.preventDefault()
               const mark = HOTKEYS[hotkey]
               toggleMark(editor, mark)
@@ -64,7 +66,7 @@ const RichTextExample = () => {
   )
 }
 
-const toggleBlock = (editor, format) => {
+const toggleBlock = (editor: Editor, format: string) => {
   const isActive = isBlockActive(
     editor,
     format,
@@ -76,11 +78,14 @@ const toggleBlock = (editor, format) => {
     match: n =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type) &&
+      LIST_TYPES.includes((n as any).type) &&
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
   })
-  let newProperties: Partial<SlateElement>
+  let newProperties: Partial<SlateElement> & {
+    align?: string
+    type?: string
+  }
   if (TEXT_ALIGN_TYPES.includes(format)) {
     newProperties = {
       align: isActive ? undefined : format,
@@ -98,7 +103,7 @@ const toggleBlock = (editor, format) => {
   }
 }
 
-const toggleMark = (editor, format) => {
+const toggleMark = (editor: Editor, format: string) => {
   const isActive = isMarkActive(editor, format)
 
   if (isActive) {
@@ -108,7 +113,7 @@ const toggleMark = (editor, format) => {
   }
 }
 
-const isBlockActive = (editor, format, blockType = 'type') => {
+const isBlockActive = (editor: Editor, format: string, blockType = 'type') => {
   const { selection } = editor
   if (!selection) return false
 
@@ -118,19 +123,25 @@ const isBlockActive = (editor, format, blockType = 'type') => {
       match: n =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
-        n[blockType] === format,
+        (n as any)[blockType] === format,
     })
   )
 
   return !!match
 }
 
-const isMarkActive = (editor, format) => {
-  const marks = Editor.marks(editor)
+const isMarkActive = (editor: Editor, format: string) => {
+  const marks = Editor.marks(editor) as any
   return marks ? marks[format] === true : false
 }
 
-const Element = ({ attributes, children, element }) => {
+type ElementProps = {
+  attributes: any,
+  children: React.ReactNode,
+  element: any
+}
+
+const Element = ({ attributes, children, element }: ElementProps) => {
   const style = { textAlign: element.align }
   switch (element.type) {
     case 'block-quote':
@@ -178,7 +189,13 @@ const Element = ({ attributes, children, element }) => {
   }
 }
 
-const Leaf = ({ attributes, children, leaf }) => {
+type LeafProps = {
+  attributes: any,
+  children: React.ReactNode,
+  leaf: any
+}
+
+const Leaf = ({ attributes, children, leaf }: LeafProps) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }
@@ -198,7 +215,12 @@ const Leaf = ({ attributes, children, leaf }) => {
   return <span {...attributes}>{children}</span>
 }
 
-const BlockButton = ({ format, icon }) => {
+type ButtonProps = {
+  format: string,
+  icon: string
+}
+
+const BlockButton = ({ format, icon }: ButtonProps) => {
   const editor = useSlate()
   return (
     <Button
@@ -207,32 +229,32 @@ const BlockButton = ({ format, icon }) => {
         format,
         TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
       )}
-      onMouseDown={event => {
+      onMouseDown={(event: MouseEvent) => {
         event.preventDefault()
         toggleBlock(editor, format)
       }}
     >
-      <Icon>{icon}</Icon>
+      {icon}
     </Button>
   )
 }
 
-const MarkButton = ({ format, icon }) => {
+const MarkButton = ({ format, icon }: ButtonProps) => {
   const editor = useSlate()
   return (
     <Button
       active={isMarkActive(editor, format)}
-      onMouseDown={event => {
+      onMouseDown={(event: MouseEvent) => {
         event.preventDefault()
         toggleMark(editor, format)
       }}
     >
-      <Icon>{icon}</Icon>
+      {icon}
     </Button>
   )
 }
 
-const initialValue: Descendant[] = [
+const initialValue: any[] = [
   {
     type: 'paragraph',
     children: [

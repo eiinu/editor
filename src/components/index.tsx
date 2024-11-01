@@ -3,10 +3,9 @@ import ReactDOM from 'react-dom'
 import { cx, css } from '@emotion/css'
 
 interface BaseProps {
-  className: string
+  className?: string
   [key: string]: unknown
 }
-type OrNull<T> = T | null
 
 export const Button = React.forwardRef(
   (
@@ -15,13 +14,8 @@ export const Button = React.forwardRef(
       active,
       reversed,
       ...props
-    }: PropsWithChildren<
-      {
-        active: boolean
-        reversed: boolean
-      } & BaseProps
-    >,
-    ref: Ref<OrNull<HTMLSpanElement>>
+    }: any,
+    ref: Ref<any>
   ) => (
     <span
       {...props}
@@ -49,20 +43,16 @@ export const EditorValue = React.forwardRef(
       className,
       value,
       ...props
-    }: PropsWithChildren<
-      {
-        value: any
-      } & BaseProps
-    >,
-    ref: Ref<OrNull<null>>
+    }: any,
+    ref: Ref<any>
   ) => {
     const textLines = value.document.nodes
-      .map(node => node.text)
+      .map((node: any) => node.text)
       .toArray()
       .join('\n')
     return (
       <div
-        ref={ref}
+        ref={ref as any}
         {...props}
         className={cx(
           className,
@@ -100,30 +90,10 @@ export const EditorValue = React.forwardRef(
   }
 )
 
-export const Icon = React.forwardRef(
-  (
-    { className, ...props }: PropsWithChildren<BaseProps>,
-    ref: Ref<OrNull<HTMLSpanElement>>
-  ) => (
-    <span
-      {...props}
-      ref={ref}
-      className={cx(
-        'material-icons',
-        className,
-        css`
-          font-size: 18px;
-          vertical-align: text-bottom;
-        `
-      )}
-    />
-  )
-)
-
 export const Instruction = React.forwardRef(
   (
     { className, ...props }: PropsWithChildren<BaseProps>,
-    ref: Ref<OrNull<HTMLDivElement>>
+    ref: Ref<any>
   ) => (
     <div
       {...props}
@@ -145,7 +115,7 @@ export const Instruction = React.forwardRef(
 export const Menu = React.forwardRef(
   (
     { className, ...props }: PropsWithChildren<BaseProps>,
-    ref: Ref<OrNull<HTMLDivElement>>
+    ref: Ref<any>
   ) => (
     <div
       {...props}
@@ -176,7 +146,7 @@ export const Portal = ({ children }: { children?: ReactNode }) => {
 export const Toolbar = React.forwardRef(
   (
     { className, ...props }: PropsWithChildren<BaseProps>,
-    ref: Ref<OrNull<HTMLDivElement>>
+    ref: Ref<any>
   ) => (
     <Menu
       {...props}
