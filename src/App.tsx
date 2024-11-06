@@ -21,7 +21,7 @@ const HOTKEYS = {
   [key: string]: string
 }
 
-const LIST_TYPES = ['numbered-list', 'bulleted-list']
+const LIST_TYPES = ['numbered-list', 'bulleted-list', 'todo']
 const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 const defaultValue: any[] = [
@@ -85,8 +85,21 @@ const defaultValue: any[] = [
       }
     ]
   },
-  { type: "paragraph", align: "left", children: [{ text: "todo false" }] },
-  { type: "paragraph", align: "left", children: [{ text: "todo true" }] },
+  {
+    type: "todo",
+    children: [
+      {
+        type: "todo-item",
+        checked: true,
+        children: [{ text: "todo true" }]
+      },
+      {
+        type: "todo-item",
+        checked: false,
+        children: [{ text: "todo false" }]
+      }
+    ]
+  },
   { type: "paragraph", children: [{ text: "align left" }], align: "left" },
   { type: "paragraph", align: "center", children: [{ text: "align center" }] },
   { type: "paragraph", align: "right", children: [{ text: "align right" }] },
@@ -143,6 +156,7 @@ const RichTextExample = () => {
         <BlockButton format="block-quote" icon="format_quote" />
         <BlockButton format="numbered-list" icon="numbered" />
         <BlockButton format="bulleted-list" icon="bulleted" />
+        <BlockButton format="todo" icon="bulleted" />
         <BlockButton format="left" icon="align_left" />
         <BlockButton format="center" icon="align_center" />
         <BlockButton format="right" icon="align_right" />
@@ -254,10 +268,21 @@ const Element = ({ attributes, children, element }: ElementProps) => {
         </blockquote>
       )
     case 'bulleted-list':
+    case 'todo':
       return (
         <ul style={style} {...attributes}>
           {children}
         </ul>
+      )
+    case 'todo-item':
+      return (
+        <li style={style} {...attributes}>
+          <input type='checkbox' defaultChecked={element.checked} onChange={(e) => {
+            console.log(e)
+            element.checked = e.target.checked
+          }}></input>
+          {children}
+        </li>
       )
     case 'h1':
       return (
