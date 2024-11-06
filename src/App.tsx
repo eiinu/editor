@@ -24,40 +24,75 @@ const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 const defaultValue: any[] = [
+  { type: "paragraph", align: "left", children: [{ text: "1. Inline" }] },
   {
-    type: 'paragraph',
+    type: "paragraph",
+    align: "left",
     children: [
-      { text: 'This is editable ' },
-      { text: 'rich', bold: true },
-      { text: ' text, ' },
-      { text: 'much', italic: true },
-      { text: ' better than a ' },
-      { text: '<textarea>', code: true },
-      { text: '!' },
-    ],
+      { text: "bold", bold: true },
+      { text: " " },
+      { text: "italic", italic: true },
+      { text: " " },
+      { text: "underline", underline: true },
+      { text: " " },
+      { text: "code", code: true },
+      { text: " " },
+      { text: "line-through", lineThrough: true },
+      { text: " " }
+    ]
   },
+  { type: "paragraph", align: "left", children: [{ text: "" }] },
+  { type: "paragraph", align: "left", children: [{ text: "2. Block" }] },
+  { type: "h1", align: "left", children: [{ text: "header1" }] },
+  { type: "h2", align: "left", children: [{ text: "header2" }] },
+  { type: "h3", align: "left", children: [{ text: "header3" }] },
+  { type: "h4", align: "left", children: [{ text: "header4" }] },
+  { type: "h5", align: "left", children: [{ text: "header5" }] },
+  { type: "h6", align: "left", children: [{ text: "header6" }] },
+  { type: "block-quote", align: "left", children: [{ text: "quote" }] },
   {
-    type: 'paragraph',
+    type: "numbered-list",
     children: [
       {
-        text: "Since it's rich text, you can do things like turn a selection of text ",
+        type: "list-item",
+        align: "left",
+        children: [{ text: "numbered list 1" }]
       },
-      { text: 'bold', bold: true },
       {
-        text: ', or add a semantically rendered block quote in the middle of the page, like this:',
+        type: "list-item",
+        align: "left",
+        children: [{ text: "numbered list 2" }]
+      }
+    ]
+  },
+  {
+    type: "bulleted-list",
+    children: [
+      {
+        type: "list-item",
+        align: "left",
+        children: [{ text: "bulleted list 1" }]
       },
-    ],
+      {
+        type: "list-item",
+        align: "left",
+        children: [{ text: "bulleted list 2" }]
+      }
+    ]
   },
+  { type: "paragraph", align: "left", children: [{ text: "todo false" }] },
+  { type: "paragraph", align: "left", children: [{ text: "todo true" }] },
+  { type: "paragraph", children: [{ text: "align left" }], align: "left" },
+  { type: "paragraph", align: "center", children: [{ text: "align center" }] },
+  { type: "paragraph", align: "right", children: [{ text: "align right" }] },
   {
-    type: 'block-quote',
-    children: [{ text: 'A wise quote.' }],
+    type: "paragraph",
+    align: "justify",
+    children: [{ text: "align justify" }]
   },
-  {
-    type: 'paragraph',
-    align: 'center',
-    children: [{ text: 'Try it out for yourself!' }],
-  },
-]
+  { type: "paragraph", align: "left", children: [{ text: "" }] },
+  { type: "paragraph", align: "left", children: [{ text: "" }] }
+];
 
 const RichTextExample = () => {
   const renderElement = useCallback((props: any) => <Element {...props} />, [])
@@ -91,8 +126,13 @@ const RichTextExample = () => {
         <MarkButton format="italic" icon="italic" />
         <MarkButton format="underline" icon="underline" />
         <MarkButton format="code" icon="code" />
-        <BlockButton format="heading-one" icon="looks_one" />
-        <BlockButton format="heading-two" icon="looks_two" />
+        <MarkButton format="lineThrough" icon="line-through" />
+        <BlockButton format="h1" icon="h1" />
+        <BlockButton format="h2" icon="h2" />
+        <BlockButton format="h3" icon="h3" />
+        <BlockButton format="h4" icon="h4" />
+        <BlockButton format="h5" icon="h5" />
+        <BlockButton format="h6" icon="h6" />
         <BlockButton format="block-quote" icon="format_quote" />
         <BlockButton format="numbered-list" icon="numbered" />
         <BlockButton format="bulleted-list" icon="bulleted" />
@@ -212,17 +252,41 @@ const Element = ({ attributes, children, element }: ElementProps) => {
           {children}
         </ul>
       )
-    case 'heading-one':
+    case 'h1':
       return (
         <h1 style={style} {...attributes}>
           {children}
         </h1>
       )
-    case 'heading-two':
+    case 'h2':
       return (
         <h2 style={style} {...attributes}>
           {children}
         </h2>
+      )
+    case 'h3':
+      return (
+        <h3 style={style} {...attributes}>
+          {children}
+        </h3>
+      )
+    case 'h4':
+      return (
+        <h4 style={style} {...attributes}>
+          {children}
+        </h4>
+      )
+    case 'h5':
+      return (
+        <h5 style={style} {...attributes}>
+          {children}
+        </h5>
+      )
+    case 'h6':
+      return (
+        <h6 style={style} {...attributes}>
+          {children}
+        </h6>
       )
     case 'list-item':
       return (
@@ -254,6 +318,10 @@ type LeafProps = {
 const Leaf = ({ attributes, children, leaf }: LeafProps) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>
+  }
+
+  if (leaf.lineThrough) {
+    children = <del>{children}</del>
   }
 
   if (leaf.code) {
