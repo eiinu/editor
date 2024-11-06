@@ -23,13 +23,69 @@ const HOTKEYS = {
 const LIST_TYPES = ['numbered-list', 'bulleted-list']
 const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
+const defaultValue: any[] = [
+  {
+    type: 'paragraph',
+    children: [
+      { text: 'This is editable ' },
+      { text: 'rich', bold: true },
+      { text: ' text, ' },
+      { text: 'much', italic: true },
+      { text: ' better than a ' },
+      { text: '<textarea>', code: true },
+      { text: '!' },
+    ],
+  },
+  {
+    type: 'paragraph',
+    children: [
+      {
+        text: "Since it's rich text, you can do things like turn a selection of text ",
+      },
+      { text: 'bold', bold: true },
+      {
+        text: ', or add a semantically rendered block quote in the middle of the page, like this:',
+      },
+    ],
+  },
+  {
+    type: 'block-quote',
+    children: [{ text: 'A wise quote.' }],
+  },
+  {
+    type: 'paragraph',
+    align: 'center',
+    children: [{ text: 'Try it out for yourself!' }],
+  },
+]
+
 const RichTextExample = () => {
   const renderElement = useCallback((props: any) => <Element {...props} />, [])
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, [])
   const editor = useMemo(() => withHistory(withReact(createEditor())), [])
 
+  const value = useMemo(
+    () =>{
+      try {
+        const content = localStorage.getItem('content')
+        if (content) return JSON.parse(content)
+      } catch {}
+      return defaultValue
+    },
+    []
+  )
+
+
   return (
-    <Slate editor={editor} initialValue={initialValue}>
+    <Slate editor={editor} initialValue={value} onChange={(value) => {
+      const isAstChange = editor.operations.some(
+        op => 'set_selection' !== op.type
+      )
+      if (isAstChange) {
+        const content = JSON.stringify(value)
+        localStorage.setItem('content', content)
+      }
+    }}>
       <Toolbar>
         <MarkButton format="bold" icon="bold" />
         <MarkButton format="italic" icon="italic" />
@@ -253,41 +309,5 @@ const MarkButton = ({ format, icon }: ButtonProps) => {
     </Button>
   )
 }
-
-const initialValue: any[] = [
-  {
-    type: 'paragraph',
-    children: [
-      { text: 'This is editable ' },
-      { text: 'rich', bold: true },
-      { text: ' text, ' },
-      { text: 'much', italic: true },
-      { text: ' better than a ' },
-      { text: '<textarea>', code: true },
-      { text: '!' },
-    ],
-  },
-  {
-    type: 'paragraph',
-    children: [
-      {
-        text: "Since it's rich text, you can do things like turn a selection of text ",
-      },
-      { text: 'bold', bold: true },
-      {
-        text: ', or add a semantically rendered block quote in the middle of the page, like this:',
-      },
-    ],
-  },
-  {
-    type: 'block-quote',
-    children: [{ text: 'A wise quote.' }],
-  },
-  {
-    type: 'paragraph',
-    align: 'center',
-    children: [{ text: 'Try it out for yourself!' }],
-  },
-]
 
 export default RichTextExample
