@@ -10,6 +10,7 @@ import {
 import { withHistory } from 'slate-history'
 import { Button, Toolbar } from './components'
 import './App.less'
+import { CSSProperties } from 'react'
 
 const HOTKEYS = {
   'mod+b': 'bold',
@@ -38,6 +39,10 @@ const defaultValue: any[] = [
       { text: "code", code: true },
       { text: " " },
       { text: "line-through", lineThrough: true },
+      { text: " " },
+      { text: "color", color: "pink" },
+      { text: " " },
+      { text: "backgroundColor", backgroundColor: "skyblue" },
       { text: " " }
     ]
   },
@@ -127,6 +132,8 @@ const RichTextExample = () => {
         <MarkButton format="underline" icon="underline" />
         <MarkButton format="code" icon="code" />
         <MarkButton format="lineThrough" icon="line-through" />
+        <StyleButton format="color" value="pink" icon="color:pink" />
+        <StyleButton format="backgroundColor" value="skyblue" icon="bgColor:skyblue" />
         <BlockButton format="h1" icon="h1" />
         <BlockButton format="h2" icon="h2" />
         <BlockButton format="h3" icon="h3" />
@@ -316,6 +323,14 @@ type LeafProps = {
 }
 
 const Leaf = ({ attributes, children, leaf }: LeafProps) => {
+  const style: CSSProperties = {}
+  if (leaf.color) {
+    style.color = leaf.color
+  }
+  if (leaf.backgroundColor) {
+    style.backgroundColor = leaf.backgroundColor
+  }
+
   if (leaf.bold) {
     children = <strong>{children}</strong>
   }
@@ -336,11 +351,12 @@ const Leaf = ({ attributes, children, leaf }: LeafProps) => {
     children = <u>{children}</u>
   }
 
-  return <span {...attributes}>{children}</span>
+  return <span {...attributes} style={style}>{children}</span>
 }
 
 type ButtonProps = {
   format: string,
+  value?: string,
   icon: string
 }
 
@@ -363,6 +379,16 @@ const BlockButton = ({ format, icon }: ButtonProps) => {
   )
 }
 
+const toggleStyle = (editor: Editor, format: string, value: string) => {
+  const marks = Editor.marks(editor) as any
+  const isActive = marks ? marks[format] === value : false
+  if (isActive) {
+    Editor.removeMark(editor, format)
+  } else {
+    Editor.addMark(editor, format, value)
+  }
+}
+
 const MarkButton = ({ format, icon }: ButtonProps) => {
   const editor = useSlate()
   return (
@@ -371,6 +397,21 @@ const MarkButton = ({ format, icon }: ButtonProps) => {
       onMouseDown={(event: MouseEvent) => {
         event.preventDefault()
         toggleMark(editor, format)
+      }}
+    >
+      {icon}
+    </Button>
+  )
+}
+
+const StyleButton = ({ format, value, icon }: ButtonProps) => {
+  const editor = useSlate()
+  return (
+    <Button
+      active={isMarkActive(editor, format)}
+      onMouseDown={(event: MouseEvent) => {
+        event.preventDefault()
+        toggleStyle(editor, format, value || '')
       }}
     >
       {icon}

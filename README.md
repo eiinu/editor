@@ -11,9 +11,9 @@ A web editor based on slatejs.
   - [x] italic
   - [x] underline
   - [x] Code Inline
-  - [ ] line-through
-  - [ ] font-color
-  - [ ] background-color
+  - [x] line-through
+  - [x] font-color
+  - [x] background-color
   - [ ] link
 - block
   - [x] header
