@@ -13,21 +13,20 @@ import './App.less'
 import { CSSProperties } from 'react'
 
 const HOTKEYS = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-  'mod+`': 'code',
+  'mod+b': ['bold', true],
+  'mod+i': ['italic', true],
+  'mod+u': ['underline', true],
+  'mod+`': ['code', true],
 } as {
-  [key: string]: string
+  [key: string]: [string, string | boolean]
 }
 
 const LIST_TYPES = ['numbered-list', 'bulleted-list', 'todo']
-const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
 const defaultValue: any[] = [
-  { type: "paragraph", align: "left", children: [{ text: "1. Inline" }] },
+  { type: "p", align: "left", children: [{ text: "1. Inline" }] },
   {
-    type: "paragraph",
+    type: "p",
     align: "left",
     children: [
       { text: "bold", bold: true },
@@ -46,8 +45,8 @@ const defaultValue: any[] = [
       { text: " " }
     ]
   },
-  { type: "paragraph", align: "left", children: [{ text: "" }] },
-  { type: "paragraph", align: "left", children: [{ text: "2. Block" }] },
+  { type: "p", align: "left", children: [{ text: "" }] },
+  { type: "p", align: "left", children: [{ text: "2. Block" }] },
   { type: "h1", align: "left", children: [{ text: "header1" }] },
   { type: "h2", align: "left", children: [{ text: "header2" }] },
   { type: "h3", align: "left", children: [{ text: "header3" }] },
@@ -100,16 +99,16 @@ const defaultValue: any[] = [
       }
     ]
   },
-  { type: "paragraph", children: [{ text: "align left" }], align: "left" },
-  { type: "paragraph", align: "center", children: [{ text: "align center" }] },
-  { type: "paragraph", align: "right", children: [{ text: "align right" }] },
+  { type: "p", children: [{ text: "align left" }], align: "left" },
+  { type: "p", align: "center", children: [{ text: "align center" }] },
+  { type: "p", align: "right", children: [{ text: "align right" }] },
   {
-    type: "paragraph",
+    type: "p",
     align: "justify",
     children: [{ text: "align justify" }]
   },
-  { type: "paragraph", align: "left", children: [{ text: "" }] },
-  { type: "paragraph", align: "left", children: [{ text: "" }] }
+  { type: "p", children: [{ text: "text indent 2em" }], textIndent: '2em' },
+  { type: "p", children: [{ text: "text indent 4em" }], textIndent: '4em' }
 ];
 
 const RichTextExample = () => {
@@ -145,8 +144,8 @@ const RichTextExample = () => {
         <MarkButton format="underline" icon="underline" />
         <MarkButton format="code" icon="code" />
         <MarkButton format="lineThrough" icon="line-through" />
-        <StyleButton format="color" value="pink" icon="color:pink" />
-        <StyleButton format="backgroundColor" value="skyblue" icon="bgColor:skyblue" />
+        <MarkButton format="color" value="pink" icon="color:pink" />
+        <MarkButton format="backgroundColor" value="skyblue" icon="bgColor:skyblue" />
         <BlockButton format="h1" icon="h1" />
         <BlockButton format="h2" icon="h2" />
         <BlockButton format="h3" icon="h3" />
@@ -157,10 +156,12 @@ const RichTextExample = () => {
         <BlockButton format="numbered-list" icon="numbered" />
         <BlockButton format="bulleted-list" icon="bulleted" />
         <BlockButton format="todo" icon="bulleted" />
-        <BlockButton format="left" icon="align_left" />
-        <BlockButton format="center" icon="align_center" />
-        <BlockButton format="right" icon="align_right" />
-        <BlockButton format="justify" icon="align_justify" />
+        <BlockButton format="align" value="left" icon="align_left" />
+        <BlockButton format="align" value="center" icon="align_center" />
+        <BlockButton format="align" value="right" icon="align_right" />
+        <BlockButton format="align" value="justify" icon="align_justify" />
+        <BlockButton format="textIndent" value="2em" icon="2em" />
+        <BlockButton format="textIndent" value="4em" icon="4em" />
       </Toolbar>
       <Editable
         className='editable-content'
@@ -173,8 +174,8 @@ const RichTextExample = () => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, event)) {
               event.preventDefault()
-              const mark = HOTKEYS[hotkey]
-              toggleMark(editor, mark)
+              const [mark, value] = HOTKEYS[hotkey]
+              toggleMark(editor, mark, value)
             }
           }
         }}
@@ -183,11 +184,11 @@ const RichTextExample = () => {
   )
 }
 
-const toggleBlock = (editor: Editor, format: string) => {
+const toggleBlock = (editor: Editor, format: string, value: string | boolean) => {
   const isActive = isBlockActive(
     editor,
     format,
-    TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
+    value
   )
   const isList = LIST_TYPES.includes(format)
 
@@ -196,20 +197,21 @@ const toggleBlock = (editor: Editor, format: string) => {
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
       LIST_TYPES.includes((n as any).type) &&
-      !TEXT_ALIGN_TYPES.includes(format),
+      format !== 'align' && format === 'textIndent',
     split: true,
   })
   let newProperties: Partial<SlateElement> & {
-    align?: string
+    align?: string | boolean
+    textIndent?: string | boolean
     type?: string
   }
-  if (TEXT_ALIGN_TYPES.includes(format)) {
+  if (format === 'align') {
     newProperties = {
-      align: isActive ? undefined : format,
+      align: value,
     }
   } else {
     newProperties = {
-      type: isActive ? 'paragraph' : isList ? 'list-item' : format,
+      type: isActive ? 'p' : isList ? 'list-item' : format,
     }
   }
   Transforms.setNodes<SlateElement>(editor, newProperties)
@@ -220,19 +222,29 @@ const toggleBlock = (editor: Editor, format: string) => {
   }
 }
 
-const toggleMark = (editor: Editor, format: string) => {
-  const isActive = isMarkActive(editor, format)
-
+const toggleMark = (editor: Editor, format: string, value: string | boolean) => {
+  const marks = Editor.marks(editor) as any
+  const isActive = marks ? marks[format] === value : false
   if (isActive) {
     Editor.removeMark(editor, format)
   } else {
-    Editor.addMark(editor, format, true)
+    Editor.addMark(editor, format, value)
   }
 }
 
-const isBlockActive = (editor: Editor, format: string, blockType = 'type') => {
+const isBlockActive = (editor: Editor, format: string, value: string | boolean) => {
   const { selection } = editor
   if (!selection) return false
+
+  let key
+  let val
+  if (format === 'align' || format === 'textIndent') {
+    key = format
+    val = value
+  } else {
+    key = 'type'
+    val = format
+  }
 
   const [match] = Array.from(
     Editor.nodes(editor, {
@@ -240,16 +252,16 @@ const isBlockActive = (editor: Editor, format: string, blockType = 'type') => {
       match: n =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
-        (n as any)[blockType] === format,
+        (n as any)[key] === val,
     })
   )
 
   return !!match
 }
 
-const isMarkActive = (editor: Editor, format: string) => {
+const getFormatValue = (editor: Editor, format: string) => {
   const marks = Editor.marks(editor) as any
-  return marks ? marks[format] === true : false
+  return marks ? marks[format] : false
 }
 
 type ElementProps = {
@@ -259,7 +271,10 @@ type ElementProps = {
 }
 
 const Element = ({ attributes, children, element }: ElementProps) => {
-  const style = { textAlign: element.align }
+  const style = {
+    textAlign: element.align,
+    textIndent: element.textIndent,
+  }
   switch (element.type) {
     case 'block-quote':
       return (
@@ -381,22 +396,22 @@ const Leaf = ({ attributes, children, leaf }: LeafProps) => {
 
 type ButtonProps = {
   format: string,
-  value?: string,
+  value?: string | boolean,
   icon: string
 }
 
-const BlockButton = ({ format, icon }: ButtonProps) => {
+const BlockButton = ({ format, icon, value = false }: ButtonProps) => {
   const editor = useSlate()
   return (
     <Button
       active={isBlockActive(
         editor,
         format,
-        TEXT_ALIGN_TYPES.includes(format) ? 'align' : 'type'
+        value
       )}
       onMouseDown={(event: MouseEvent) => {
         event.preventDefault()
-        toggleBlock(editor, format)
+        toggleBlock(editor, format, value)
       }}
     >
       {icon}
@@ -404,39 +419,14 @@ const BlockButton = ({ format, icon }: ButtonProps) => {
   )
 }
 
-const toggleStyle = (editor: Editor, format: string, value: string) => {
-  const marks = Editor.marks(editor) as any
-  const isActive = marks ? marks[format] === value : false
-  if (isActive) {
-    Editor.removeMark(editor, format)
-  } else {
-    Editor.addMark(editor, format, value)
-  }
-}
-
-const MarkButton = ({ format, icon }: ButtonProps) => {
+const MarkButton = ({ format, icon, value = true }: ButtonProps) => {
   const editor = useSlate()
   return (
     <Button
-      active={isMarkActive(editor, format)}
+      active={getFormatValue(editor, format)}
       onMouseDown={(event: MouseEvent) => {
         event.preventDefault()
-        toggleMark(editor, format)
-      }}
-    >
-      {icon}
-    </Button>
-  )
-}
-
-const StyleButton = ({ format, value, icon }: ButtonProps) => {
-  const editor = useSlate()
-  return (
-    <Button
-      active={isMarkActive(editor, format)}
-      onMouseDown={(event: MouseEvent) => {
-        event.preventDefault()
-        toggleStyle(editor, format, value || '')
+        toggleMark(editor, format, value)
       }}
     >
       {icon}

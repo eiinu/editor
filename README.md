@@ -26,8 +26,8 @@ A web editor based on slatejs.
 
 - inline
   - [ ] Equation
-  - [ ] text-indent
 - block
+  - [x] text-indent
   - [x] Todo
   - [ ] indent
   - [ ] Divider
