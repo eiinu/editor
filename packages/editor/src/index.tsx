@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import isHotkey from 'is-hotkey'
 import { Editable, withReact, useSlate, Slate } from 'slate-react'
 import {
@@ -9,7 +9,6 @@ import {
 } from 'slate'
 import { withHistory } from 'slate-history'
 import { Button, Toolbar } from './components'
-import './App.less'
 import { CSSProperties } from 'react'
 
 const HOTKEYS = {
@@ -111,7 +110,7 @@ const defaultValue: any[] = [
   { type: "p", children: [{ text: "text indent 4em" }], textIndent: '4em' }
 ];
 
-const RichTextExample = () => {
+const RichTextEditor = () => {
   const renderElement = useCallback((props: any) => <Element {...props} />, [])
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, [])
   const editor = useMemo(() => withHistory(withReact(createEditor())), [])
@@ -434,4 +433,6 @@ const MarkButton = ({ format, icon, value = true }: ButtonProps) => {
   )
 }
 
-export default RichTextExample
+export {
+  RichTextEditor as default
+}
