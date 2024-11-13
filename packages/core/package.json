@@ -1,5 +1,5 @@
 {
-  "name": "@eiinu/editor",
+  "name": "@eiinu/editor-core",
   "version": "0.0.1",
   "description": "A web editor based on slatejs.",
   "type": "module",
