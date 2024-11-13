@@ -107,7 +107,9 @@ const defaultValue: any[] = [
     children: [{ text: "align justify" }]
   },
   { type: "p", children: [{ text: "text indent 2em" }], textIndent: '2em' },
-  { type: "p", children: [{ text: "text indent 4em" }], textIndent: '4em' }
+  { type: "p", children: [{ text: "text indent 4em" }], textIndent: '4em' },
+  { type: "p", children: [{ text: "indent 2em" }], indent: '2em' },
+  { type: "p", children: [{ text: "indent 4em" }], indent: '4em' },
 ];
 
 const RichTextEditor = () => {
@@ -159,8 +161,12 @@ const RichTextEditor = () => {
         <BlockButton format="align" value="center" icon="align_center" />
         <BlockButton format="align" value="right" icon="align_right" />
         <BlockButton format="align" value="justify" icon="align_justify" />
-        <BlockButton format="textIndent" value="2em" icon="2em" />
-        <BlockButton format="textIndent" value="4em" icon="4em" />
+        <BlockButton format="textIndent" value="0" icon="textIndent-0" />
+        <BlockButton format="textIndent" value="2em" icon="textIndent-2em" />
+        <BlockButton format="textIndent" value="4em" icon="textIndent-4em" />
+        <BlockButton format="indent" value="0" icon="indent-0" />
+        <BlockButton format="indent" value="2em" icon="indent-2em" />
+        <BlockButton format="indent" value="4em" icon="indent-4em" />
       </Toolbar>
       <Editable
         className='editable-content'
@@ -199,18 +205,19 @@ const toggleBlock = (editor: Editor, format: string, value: string | boolean) =>
       format !== 'align' && format === 'textIndent',
     split: true,
   })
-  let newProperties: Partial<SlateElement> & {
-    align?: string | boolean
-    textIndent?: string | boolean
-    type?: string
-  }
-  if (format === 'align') {
+  let newProperties: Partial<SlateElement & {
+    align: string | boolean
+    textIndent: string | boolean
+    indent: string
+    type: string
+  }>
+  if (format === 'type') {
     newProperties = {
-      align: value,
+      type: isActive ? 'p' : isList ? 'list-item' : format,
     }
   } else {
     newProperties = {
-      type: isActive ? 'p' : isList ? 'list-item' : format,
+      [format]: value,
     }
   }
   Transforms.setNodes<SlateElement>(editor, newProperties)
@@ -237,7 +244,7 @@ const isBlockActive = (editor: Editor, format: string, value: string | boolean) 
 
   let key
   let val
-  if (format === 'align' || format === 'textIndent') {
+  if (format === 'align' || format === 'textIndent' || format === 'indent') {
     key = format
     val = value
   } else {
@@ -273,6 +280,7 @@ const Element = ({ attributes, children, element }: ElementProps) => {
   const style = {
     textAlign: element.align,
     textIndent: element.textIndent,
+    paddingLeft: element.indent,
   }
   switch (element.type) {
     case 'block-quote':

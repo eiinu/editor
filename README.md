@@ -29,7 +29,7 @@ A web editor based on slatejs.
 - block
   - [x] text-indent
   - [x] Todo
-  - [ ] indent
+  - [x] indent
   - [ ] Divider
   - [ ] Image
     - [ ] resize
@@ -50,7 +50,7 @@ A web editor based on slatejs.
   - [ ] Toolbar
   - [ ] Panel Menu
 
-### 4. next
+### 3. next
 
 - block
   - [ ] Mind Map
