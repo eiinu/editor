@@ -27,14 +27,14 @@
   "author": "eiinu",
   "license": "MIT",
   "dependencies": {
+    "@emotion/css": "^11.13.5",
+    "is-hotkey": "^0.2.0",
     "slate": "^0.110.2",
     "slate-history": "^0.110.3",
-    "slate-react": "^0.111.0",
-    "@emotion/css": "^11.13.4",
-    "is-hotkey": "^0.2.0"
+    "slate-react": "^0.111.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "^5.7.2"
   },
   "peerDependencies": {
     "react": "^18.3.1",
