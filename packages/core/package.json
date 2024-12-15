@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc --emitDeclarationOnly && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -28,16 +28,16 @@
   "license": "MIT",
   "dependencies": {
     "@emotion/css": "^11.13.5",
-    "is-hotkey": "^0.2.0",
-    "slate": "^0.110.2",
-    "slate-history": "^0.110.3",
-    "slate-react": "^0.111.0"
+    "is-hotkey": "^0.2.0"
   },
   "devDependencies": {
     "typescript": "^5.7.2"
   },
   "peerDependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "slate": "^0.110.2",
+    "slate-react": "^0.111.0",
+    "slate-history": "^0.110.3"
   }
 }
