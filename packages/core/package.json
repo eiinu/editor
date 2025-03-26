@@ -31,13 +31,13 @@
     "is-hotkey": "^0.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.2"
+    "typescript": "^5.8.2"
   },
   "peerDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "slate": "^0.110.2",
-    "slate-react": "^0.111.0",
-    "slate-history": "^0.110.3"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "slate": "^0.112.0",
+    "slate-history": "^0.110.3",
+    "slate-react": "^0.112.1"
   }
 }
